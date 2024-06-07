@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL Score Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>IPL Score Prediction</h1>
+        <form method="post" action="/predict">
+            <label for="batting_team">Batting Team:</label>
+            <select id="batting_team" name="batting_team" required>
+                {% for team in batting_teams %}
+                    <option value="{{ team }}">{{ team }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="bowling_team">Bowling Team:</label>
+            <select id="bowling_team" name="bowling_team" required>
+                {% for team in bowling_teams %}
+                    <option value="{{ team }}">{{ team }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="over">Current Over:</label>
+            <input type="number" id="over" name="over" min="1" max="20" required><br>
+
+            <label for="runs">Total Runs:</label>
+            <input type="number" id="runs" name="runs" min="0" required><br>
+
+            <label for="wickets">Total Wickets:</label>
+            <input type="number" id="wickets" name="wickets" min="0" required><br>
+
+            <label for="last_5_over_runs">Runs in Last 5 Overs:</label>
+            <input type="number" id="last_5_over_runs" name="last_5_over_runs" min="0" required><br>
+
+            <label for="last_5_over_wickets">Wickets in Last 5 Overs:</label>
+            <input type="number" id="last_5_over_wickets" name="last_5_over_wickets" min="0" required><br>
+
+            <label for="actual_score">Actual Score:</label>
+            <input type="number" id="actual_score" name="actual_score" min="0" required><br>
+
+            <button type="submit">Predict Score</button>
+        </form>
+    </div>
+</body>
+</html>
