@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPL Score Prediction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="app-shell">
+        <header class="page-header">
+            <p class="eyebrow">Seminar Project</p>
+            <h1>IPL Score Prediction App</h1>
+            <p class="intro-copy">
+                Predict a first-innings total and estimate second-innings win probability from the live match state.
+            </p>
+        </header>
+
+        <section class="panel">
+            <div class="section-header">
+                <p class="section-label">Match Setup</p>
+                <h2>Choose different batting and bowling teams.</h2>
+            </div>
+
+            <div class="field-grid">
+                <label class="field">
+                    <span>Batting team</span>
+                    <select id="batting_team" name="batting_team">
+                        {% for team in teams %}
+                        <option value="{{ team }}" {% if loop.first %}selected{% endif %}>{{ team }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Bowling team</span>
+                    <select id="bowling_team" name="bowling_team">
+                        {% for team in teams %}
+                        <option value="{{ team }}" {% if loop.index == 2 %}selected{% endif %}>{{ team }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+
+            <p id="team_error" class="error-text hidden"></p>
+        </section>
+
+        <section class="panel-grid">
+            <section class="panel">
+                <div class="section-header">
+                    <p class="section-label">First Innings Prediction</p>
+                    <h2>Estimate the final total.</h2>
+                    <p id="first_innings_teams" class="innings-team-meta">
+                        Batting: -- | Bowling: --
+                    </p>
+                </div>
+
+                <form id="first_innings_form" class="stack">
+                    <label class="field">
+                        <span>Current score</span>
+                        <input type="number" id="first_current_score" min="0" placeholder="92" required>
+                    </label>
+
+                    <div class="field-grid compact-grid">
+                        <label class="field">
+                            <span>Overs completed</span>
+                            <input type="text" id="first_overs_completed" placeholder="10.3" required>
+                        </label>
+
+                        <label class="field">
+                            <span>Wickets fallen</span>
+                            <input type="number" id="first_wickets_fallen" min="0" max="10" placeholder="3" required>
+                        </label>
+                    </div>
+
+                    <p id="first_form_error" class="error-text hidden"></p>
+                    <button type="submit" id="first_submit">Predict First Innings</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="section-header">
+                    <p class="section-label">Second Innings Prediction</p>
+                    <h2>Estimate the chase win probability.</h2>
+                    <p id="second_innings_teams" class="innings-team-meta">
+                        Batting: -- | Bowling: --
+                    </p>
+                </div>
+
+                <form id="second_innings_form" class="stack">
+                    <label class="field">
+                        <span>Target score</span>
+                        <small class="field-hint">Auto-fills with the first-innings final total when that innings is complete.</small>
+                        <input type="number" id="target_score" min="1" placeholder="176" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Current score</span>
+                        <input type="number" id="second_current_score" min="0" placeholder="118" required>
+                    </label>
+
+                    <div class="field-grid compact-grid">
+                        <label class="field">
+                            <span>Overs completed</span>
+                            <input type="text" id="second_overs_completed" placeholder="14.2" required>
+                        </label>
+
+                        <label class="field">
+                            <span>Wickets fallen</span>
+                            <input type="number" id="second_wickets_fallen" min="0" max="10" placeholder="4" required>
+                        </label>
+                    </div>
+
+                    <p id="second_form_error" class="error-text hidden"></p>
+                    <button type="submit" id="second_submit">Predict Win Probability</button>
+                </form>
+            </section>
+        </section>
+
+        <section class="panel results-panel">
+            <div class="section-header">
+                <p class="section-label">Results Display</p>
+                <h2>View both predictions in one place.</h2>
+            </div>
+
+            <div class="results-grid">
+                <article class="result-block">
+                    <span class="result-label">First innings score</span>
+                    <strong id="predicted_score_value">--</strong>
+                    <p id="predicted_score_range" class="result-meta">Submit the first-innings form to see a score range.</p>
+                </article>
+
+                <article class="result-block">
+                    <span class="result-label">Innings win probability</span>
+                    <div class="probability-stack">
+                        <div class="probability-row">
+                            <div class="probability-head">
+                                <span id="batting_team_label" class="probability-team">Batting team</span>
+                                <strong id="batting_win_pct">--</strong>
+                            </div>
+                            <div class="probability-bar">
+                                <div id="batting_win_bar" class="probability-fill batting-fill"></div>
+                            </div>
+                        </div>
+
+                        <div class="probability-row">
+                            <div class="probability-head">
+                                <span id="bowling_team_label" class="probability-team">Bowling team</span>
+                                <strong id="bowling_win_pct">--</strong>
+                            </div>
+                            <div class="probability-bar">
+                                <div id="bowling_win_bar" class="probability-fill bowling-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="win_probability_meta" class="result-meta">Submit the chase form to see batting and bowling win percentages.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
